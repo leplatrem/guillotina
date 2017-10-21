@@ -387,6 +387,7 @@ class PostgresqlStorage(BaseStorage):
             try:
                 await self._read_conn.execute(statement)
             except asyncpg.exceptions.UniqueViolationError:
+                # this is okay on creation, means 2 getting created at same time
                 pass
 
         await self.initialize_tid_statements()

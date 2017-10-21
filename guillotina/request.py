@@ -7,6 +7,15 @@ import asyncio
 import uuid
 
 
+class NoopTimer:
+    '''
+    For some metrics, you can provide timers to give intermittent values
+    '''
+
+    def record(self, name):
+        pass
+
+
 @implementer(IRequest, IDefaultLayer)
 class Request(web_request.Request):
     """
@@ -29,6 +38,7 @@ class Request(web_request.Request):
     _futures = None
     _uid = None
     _view_error = False
+    _timer = NoopTimer()
 
     application = None
     exc = None

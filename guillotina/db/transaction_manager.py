@@ -71,6 +71,7 @@ class TransactionManager(object):
             request._tm = self
             request._txn = txn
             user = get_authenticated_user_id(request)
+            request._timer.record('beginTransaction')
 
         if user is not None:
             txn.user = user
@@ -79,6 +80,8 @@ class TransactionManager(object):
         return txn
 
     async def commit(self, request=None, txn=None):
+        if request is not None:
+            request._timer.record('commitTransaction')
         return await shield(self._commit(request=request, txn=txn))
 
     async def _commit(self, request=None, txn=None):
@@ -116,6 +119,8 @@ class TransactionManager(object):
             self._last_db_conn = None
 
     async def abort(self, request=None, txn=None):
+        if request is not None:
+            request._timer.record('abortTransaction')
         return await shield(self._abort(request=request, txn=txn))
 
     async def _abort(self, request=None, txn=None):

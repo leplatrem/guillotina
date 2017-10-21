@@ -186,6 +186,7 @@ class MatchInfo(AbstractMatchInfo):
     async def handler(self, request):
         """Main handler function for aiohttp."""
         request._view_error = False
+        request._timer.record('render')
         if app_settings['check_writable_request'](request):
             try:
                 # We try to avoid collisions on the same instance of
@@ -250,6 +251,7 @@ class MatchInfo(AbstractMatchInfo):
 
         request.execute_futures()
 
+        request._timer.record('done')
         return resp
 
     def get_info(self):
@@ -308,6 +310,7 @@ class TraversalRouter(AbstractRouter):
 
     async def real_resolve(self, request):
         """Main function to resolve a request."""
+        request._timer.record('resolve')
         security = IInteraction(request)
 
         method = app_settings['http_methods'][request.method]
@@ -424,11 +427,13 @@ class TraversalRouter(AbstractRouter):
 
     async def traverse(self, request):
         """Wrapper that looks for the path based on aiohttp API."""
+        request._timer.record('traverse')
         path = tuple(p for p in request.path.split('/') if p)
         root = self._root
         return await traverse(request, root, path)
 
     async def apply_authorization(self, request):
+        request._timer.record('authorization')
         # User participation
         participation = IParticipation(request)
         # Lets extract the user from the request
