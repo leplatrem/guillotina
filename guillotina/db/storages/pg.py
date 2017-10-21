@@ -384,7 +384,10 @@ class PostgresqlStorage(BaseStorage):
         statements.extend(self._initialize_statements)
 
         for statement in statements:
-            await self._read_conn.execute(statement)
+            try:
+                await self._read_conn.execute(statement)
+            except asyncpg.exceptions.UniqueViolationError:
+                pass
 
         await self.initialize_tid_statements()
         # migrate old transaction table scheme over
