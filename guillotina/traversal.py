@@ -42,6 +42,7 @@ from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
 from guillotina.utils import import_class
+from guillotina.utils import record_request_action
 from zope.interface import alsoProvides
 
 import aiohttp
@@ -186,7 +187,7 @@ class MatchInfo(AbstractMatchInfo):
     async def handler(self, request):
         """Main handler function for aiohttp."""
         request._view_error = False
-        request._timer.record('render')
+        record_request_action(request, 'render')
         if app_settings['check_writable_request'](request):
             try:
                 # We try to avoid collisions on the same instance of
@@ -251,7 +252,6 @@ class MatchInfo(AbstractMatchInfo):
 
         request.execute_futures()
 
-        request._timer.record('done')
         return resp
 
     def get_info(self):
@@ -310,7 +310,7 @@ class TraversalRouter(AbstractRouter):
 
     async def real_resolve(self, request):
         """Main function to resolve a request."""
-        request._timer.record('resolve')
+        record_request_action(request, 'resolve')
         security = IInteraction(request)
 
         method = app_settings['http_methods'][request.method]
@@ -427,13 +427,13 @@ class TraversalRouter(AbstractRouter):
 
     async def traverse(self, request):
         """Wrapper that looks for the path based on aiohttp API."""
-        request._timer.record('traverse')
+        record_request_action(request, 'traverse')
         path = tuple(p for p in request.path.split('/') if p)
         root = self._root
         return await traverse(request, root, path)
 
     async def apply_authorization(self, request):
-        request._timer.record('authorization')
+        record_request_action(request, 'authorization')
         # User participation
         participation = IParticipation(request)
         # Lets extract the user from the request
