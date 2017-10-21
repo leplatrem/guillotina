@@ -407,3 +407,9 @@ def to_str(value):
     if isinstance(value, bytes):
         value = value.decode('utf-8')
     return value
+
+
+def record_request_action(request, name):
+    if not hasattr(getattr(request, '_timer', None), 'record'):
+        return
+    request._timer.record(name)
