@@ -1,3 +1,4 @@
+from guillotina.profile import profilable
 from zope.interface import providedBy
 from zope.interface.adapter import AdapterLookupBase
 from zope.interface.adapter import BaseAdapterRegistry
@@ -11,23 +12,22 @@ BaseAdapterRegistry._delegated = (
     'subscriptions', 'subscribers', 'asubscribers')
 
 
+@profilable
 async def asubscribers(self, objects, provided):
     subscriptions = self.subscriptions(map(providedBy, objects), provided)
+    funcs = []
     if provided is None:
-        result = ()
         for subscription in subscriptions:
             if asyncio.iscoroutinefunction(subscription):
-                await subscription(*objects)
+                funcs.append(subscription(*objects))
     else:
-        result = []
         for subscription in subscriptions:
             if asyncio.iscoroutinefunction(subscription):
-                subscriber = await subscription(*objects)
-                if subscriber is not None:
-                    result.append(subscriber)
-    return result
+                funcs.append(subscription(*objects))
+    return await asyncio.gather(*funcs)
 
 
+@profilable
 def subscribers(self, objects, provided):
     subscriptions = self.subscriptions(map(providedBy, objects), provided)
     if provided is None:
