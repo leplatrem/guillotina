@@ -15,16 +15,20 @@ BaseAdapterRegistry._delegated = (
 @profilable
 async def asubscribers(self, objects, provided):
     subscriptions = self.subscriptions(map(providedBy, objects), provided)
-    funcs = []
+    afuncs = []
     if provided is None:
         for subscription in subscriptions:
             if asyncio.iscoroutinefunction(subscription):
-                funcs.append(subscription(*objects))
+                afuncs.append(subscription(*objects))
+            else:
+                subscription(*objects)
     else:
         for subscription in subscriptions:
             if asyncio.iscoroutinefunction(subscription):
-                funcs.append(subscription(*objects))
-    return await asyncio.gather(*funcs)
+                afuncs.append(subscription(*objects))
+            else:
+                subscription(*objects)
+    await asyncio.gather(*afuncs)
 
 
 @profilable
