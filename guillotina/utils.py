@@ -292,7 +292,7 @@ def get_current_request() -> IRequest:
         task_context = aiotask_context.get('request')
         if task_context is not None:
             return task_context
-    except (ValueError, RuntimeError):
+    except (ValueError, AttributeError, RuntimeError):
         pass
 
     # fallback
