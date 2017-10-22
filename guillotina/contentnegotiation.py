@@ -838,5 +838,8 @@ def language_negotiation(request):
     if ap is None:
         language = app_settings['languages']['en']
     else:
-        language = app_settings['languages'][str(ap.language)]
+        if str(ap.language) in app_settings['languages']:
+            language = app_settings['languages'][str(ap.language)]
+        else:
+            language = app_settings['languages']['en']
     return language

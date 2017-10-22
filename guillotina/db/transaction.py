@@ -283,8 +283,8 @@ class Transaction(object):
         else:
             serial = getattr(obj, "_p_serial", 0)
 
-        await self._manager._storage.store(
-            oid, serial, IWriter(obj), obj, self)
+        writer = IWriter(obj)
+        await self._manager._storage.store(oid, serial, writer, obj, self)
         obj._p_serial = self._tid
         obj._p_oid = oid
         if obj._p_jar is None:

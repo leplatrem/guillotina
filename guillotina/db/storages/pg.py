@@ -6,6 +6,7 @@ from guillotina.db.storages.utils import get_table_definition
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from zope.interface import implementer
+from guillotina.profile import profilable
 
 import asyncio
 import asyncpg
@@ -493,6 +494,7 @@ Old Object TID: {old_serial}
 Belongs to: {writer.of}
 Parent ID: {writer.id}'''
 
+    @profilable
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
 

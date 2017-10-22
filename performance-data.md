@@ -49,3 +49,9 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
    306                                                   frame = frame.f_back
    307                                               raise RequestNotFound(RequestNotFound.__doc__)
 ```
+
+
+# resolve_dotted_name
+
+Slow enough where it doesn't make sense to call it all the time. Pre-convert these
+where it is possible.

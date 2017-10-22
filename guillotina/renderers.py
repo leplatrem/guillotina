@@ -15,6 +15,7 @@ from guillotina.interfaces import IRenderFormats
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IView
 from guillotina.interfaces.security import PermissionSetting
+from guillotina.profile import profilable
 from guillotina.utils import apply_coroutine
 from zope.interface.interface import InterfaceClass
 
@@ -117,6 +118,7 @@ def _is_guillotina_response(resp):
     for_=(IRendererFormatJson, IView, IRequest),
     provides=IRendered)
 class RendererJson(Renderer):
+    @profilable
     async def __call__(self, value):
         headers = {}
         if _is_guillotina_response(value):
@@ -145,6 +147,7 @@ class RendererJson(Renderer):
 class StringRenderer(Renderer):
     content_type = 'text/plain'
 
+    @profilable
     async def __call__(self, value):
         # Safe html transformation
         if _is_guillotina_response(value):
@@ -183,6 +186,7 @@ class RendererPlain(StringRenderer):
     provides=IRendered)
 class RendererRaw(Renderer):
 
+    @profilable
     def guess_response(self, value):
         resp = value.response
         if type(resp) in (dict, list, int, float, bool):
@@ -205,6 +209,7 @@ class RendererRaw(Renderer):
             resp.set_status(value.status)
         return resp
 
+    @profilable
     async def __call__(self, value):
         resp = value
         if isinstance(value, Response):

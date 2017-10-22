@@ -122,6 +122,31 @@ def list_or_dict_items(val):
     return [(k, v) for k, v in val.items()]
 
 
+_dotted_name_settings = (
+    'auth_extractors',
+    'auth_token_validators',
+    'auth_user_identifiers'
+)
+
+def optimize_settings(settings):
+    '''
+    pre-render settings that come in as strings but are used by the app
+    '''
+    for name in _dotted_name_settings:
+        if name not in settings:
+            continue
+        val = settings[name]
+        if isinstance(val, str):
+            settings[name] = resolve_dotted_name(val)
+        elif isinstance(val, list):
+            new_val = []
+            for v in val:
+                if isinstance(v, str):
+                    v = resolve_dotted_name(v)
+                new_val.append(v)
+            settings[name] = resolve_dotted_name(new_val)
+
+
 def make_app(config_file=None, settings=None, loop=None, server_app=None):
     app_settings.update(_delayed_default_settings)
 
@@ -262,6 +287,8 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     # Load cached Schemas
     load_cached_schema()
+
+    optimize_settings(app_settings)
 
     return server_app
 

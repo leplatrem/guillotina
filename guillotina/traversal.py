@@ -12,6 +12,7 @@ from guillotina.auth.participation import AnonymousParticipation
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.browser import UnauthorizedResponse
+from guillotina.component import getAdapter
 from guillotina.component import getUtility
 from guillotina.component import queryMultiAdapter
 from guillotina.contentnegotiation import content_type_negotiation
@@ -315,7 +316,7 @@ class TraversalRouter(AbstractRouter):
     @profilable
     async def real_resolve(self, request):
         """Main function to resolve a request."""
-        security = IInteraction(request)
+        security = getAdapter(request, IInteraction)
 
         method = app_settings['http_methods'][request.method]
 
@@ -435,6 +436,7 @@ class TraversalRouter(AbstractRouter):
         root = self._root
         return await traverse(request, root, path)
 
+    @profilable
     async def apply_authorization(self, request):
         # User participation
         participation = IParticipation(request)

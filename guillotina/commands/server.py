@@ -1,6 +1,8 @@
 from aiohttp import web
+from fnmatch import fnmatch
 from guillotina import profile
 from guillotina.commands import Command
+from guillotina.utils import get_dotted_name
 
 import cProfile
 
@@ -45,6 +47,8 @@ class ServerCommand(Command):
         parser.add_argument('--line-profiler', action='store_true',
                             dest='line_profiler', help='Line profiler execution',
                             default=False)
+        parser.add_argument('--line-profiler-matcher',
+                            help='Line profiler execution', default=None)
         parser.add_argument('--line-profiler-output',
                             help='Where to store the output of the line profiler data',
                             default=None)
@@ -62,7 +66,8 @@ class ServerCommand(Command):
         if arguments.line_profiler:
             self.line_profiler = line_profiler.LineProfiler()
             for func in profile.get_profilable_functions():
-                self.line_profiler.add_function(func)
+                if fnmatch(get_dotted_name(func), arguments.line_profiler_matcher or '*'):
+                    self.line_profiler.add_function(func)
             self.line_profiler.enable_by_count()
         if arguments.profile:
             self.profiler = cProfile.Profile()

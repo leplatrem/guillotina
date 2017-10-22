@@ -13,7 +13,6 @@
 ##############################################################################
 """Define Zope's default security policy
 """
-
 from guillotina import configure
 from guillotina.auth.users import SystemUser
 from guillotina.component import getUtility
@@ -30,6 +29,7 @@ from guillotina.interfaces import ISecurityPolicy
 from guillotina.interfaces import IView
 from guillotina.interfaces import Public
 from guillotina.interfaces import Unset
+from guillotina.profile import profilable
 from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import principal_role_manager
 from guillotina.security.security_code import role_permission_manager
@@ -71,7 +71,7 @@ def get_current_interaction(request):
     is where we start adding principals
     """
     interaction = getattr(request, 'security', None)
-    if IInteraction.providedBy(interaction):
+    if interaction is not None:
         return interaction
     interaction = Interaction(request)
     request.security = interaction
@@ -110,10 +110,14 @@ class Interaction(object):
     def invalidate_cache(self):
         self._cache = {}
 
+    @profilable
     def check_permission(self, permission, obj):
         # Always allow public attributes
         if permission is Public:
             return True
+
+        if IView.providedBy(obj):
+            obj = obj.__parent__
 
         # Iterate through participations ('principals')
         # and check permissions they give
@@ -134,13 +138,12 @@ class Interaction(object):
                 continue
 
             self.principal = principal
-            if IView.providedBy(obj):
-                obj = obj.__parent__
             # Check the permission
+            groups = self._groups_for(principal)
             if self.cached_decision(
                     obj,
                     principal.id,
-                    self._groups_for(principal),
+                    groups,
                     permission):
                 return True
 
@@ -157,6 +160,7 @@ class Interaction(object):
             self._cache[id(parent)] = cache, parent
         return cache
 
+    @profilable
     def cached_decision(self, parent, principal, groups, permission):
         # Return the decision for a principal and permission
         cache = self.cache(parent)
@@ -201,6 +205,7 @@ class Interaction(object):
         cache_decision_prin[permission] = decision = False
         return decision
 
+    @profilable
     def cached_principal_permission(
             self, parent, principal, groups, permission, level):
         # Compute the permission, if any, for the principal.

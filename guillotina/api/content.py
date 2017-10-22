@@ -48,6 +48,7 @@ from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.exceptions import DeserializationError
 from guillotina.json.utils import convert_interfaces_to_schema
+from guillotina.profile import profilable
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
@@ -107,6 +108,7 @@ async def default_head(context, request):
         "type": "string"
     }])
 class DefaultGET(Service):
+    @profilable
     async def __call__(self):
         serializer = getMultiAdapter(
             (self.context, self.request),
@@ -144,6 +146,7 @@ class DefaultGET(Service):
     })
 class DefaultPOST(Service):
 
+    @profilable
     async def __call__(self):
         """To create a content."""
         data = await self.get_data()
