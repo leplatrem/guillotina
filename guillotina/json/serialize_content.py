@@ -18,6 +18,7 @@ from guillotina.interfaces import IResourceFieldSerializer
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.json.serialize_value import json_compatible
+from guillotina.profile import profilable
 from guillotina.schema import getFields
 from zope.interface import Interface
 
@@ -35,6 +36,7 @@ class SerializeToJson(object):
         self.request = request
         self.permission_cache = {}
 
+    @profilable
     async def __call__(self, include=[], omit=[]):
         self.include = include
         self.omit = omit
@@ -84,6 +86,7 @@ class SerializeToJson(object):
 
         return result
 
+    @profilable
     async def get_schema(self, schema, context, result, behavior):
         read_permissions = merged_tagged_value_dict(schema, read_permission.key)
         schema_serial = {}
@@ -137,6 +140,7 @@ class SerializeToJson(object):
     provides=IResourceSerializeToJson)
 class SerializeFolderToJson(SerializeToJson):
 
+    @profilable
     async def __call__(self, include=[], omit=[]):
         result = await super(SerializeFolderToJson, self).__call__(include=include, omit=omit)
 

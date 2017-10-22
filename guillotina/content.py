@@ -43,6 +43,7 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
+from guillotina.profile import profilable
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.security.security_code import PrincipalPermissionManager
@@ -173,6 +174,7 @@ def iter_schemata(obj):
         yield schema
 
 
+@profilable
 async def create_content(type_, **kw):
     """Utility to create a content.
 
@@ -192,6 +194,7 @@ async def create_content(type_, **kw):
     return obj
 
 
+@profilable
 async def create_content_in_container(container, type_, id_, request=None, **kw):
     """Utility to create a content.
 
