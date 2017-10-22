@@ -29,6 +29,7 @@ from guillotina.utils import resolve_path
 from guillotina.writable import check_writable_request
 
 import aiohttp
+import aiotask_context
 import asyncio
 import json
 import logging.config
@@ -77,6 +78,7 @@ _delayed_default_settings = {
 
 class GuillotinaAIOHTTPApplication(web.Application):
     async def _handle(self, request, retries=0):
+        aiotask_context.set('request', request)
         try:
             return await super()._handle(request)
         except (ConflictError, TIDConflictError) as e:
@@ -125,6 +127,8 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     if loop is None:
         loop = asyncio.get_event_loop()
+
+    loop.set_task_factory(aiotask_context.task_factory)
 
     if config_file is not None:
         with open(config_file, 'r') as config:

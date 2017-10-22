@@ -22,6 +22,7 @@ import fnmatch
 import importlib
 import inspect
 import os
+import aiotask_context
 import pathlib
 import random
 import string
@@ -287,6 +288,14 @@ def get_current_request() -> IRequest:
     """
     Return the current request by heuristically looking it up from stack
     """
+    try:
+        task_context = aiotask_context.get('request')
+        if task_context is not None:
+            return task_context
+    except ValueError:
+        pass
+
+    # fallback
     frame = inspect.currentframe()
     while frame is not None:
         request = getattr(frame.f_locals.get('self'), 'request', None)
