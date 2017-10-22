@@ -13,6 +13,7 @@ from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
+from guillotina.profile import profilable
 from hashlib import sha256 as sha
 from zope.interface.interfaces import IInterface
 
@@ -281,6 +282,7 @@ async def get_containers(request):
                 yield txn, tm, container
 
 
+@profilable
 def get_current_request() -> IRequest:
     """
     Return the current request by heuristically looking it up from stack

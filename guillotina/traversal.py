@@ -37,6 +37,7 @@ from guillotina.interfaces import ITranslated
 from guillotina.interfaces import ITraversable
 from guillotina.interfaces import ITraversableView
 from guillotina.interfaces import SUBREQUEST_METHODS
+from guillotina.profile import profilable
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
@@ -184,6 +185,7 @@ class MatchInfo(AbstractMatchInfo):
         self._apps = []
         self._frozen = False
 
+    @profilable
     async def handler(self, request):
         """Main handler function for aiohttp."""
         request._view_error = False
@@ -225,6 +227,8 @@ class MatchInfo(AbstractMatchInfo):
                 view_result = generate_error_response(e, request, 'ViewError')
             finally:
                 await abort(request)
+
+        record_request_action(request, 'process')
 
         # Make sure its a Response object to send to renderer
         if not isinstance(view_result, Response):
@@ -308,9 +312,9 @@ class TraversalRouter(AbstractRouter):
             await abort(request)
             raise HTTPNotFound()
 
+    @profilable
     async def real_resolve(self, request):
         """Main function to resolve a request."""
-        record_request_action(request, 'resolve')
         security = IInteraction(request)
 
         method = app_settings['http_methods'][request.method]
@@ -427,13 +431,11 @@ class TraversalRouter(AbstractRouter):
 
     async def traverse(self, request):
         """Wrapper that looks for the path based on aiohttp API."""
-        record_request_action(request, 'traverse')
         path = tuple(p for p in request.path.split('/') if p)
         root = self._root
         return await traverse(request, root, path)
 
     async def apply_authorization(self, request):
-        record_request_action(request, 'authorization')
         # User participation
         participation = IParticipation(request)
         # Lets extract the user from the request
