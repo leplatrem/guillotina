@@ -9,7 +9,6 @@ from guillotina.exceptions import TIDConflictError
 from guillotina.profile import profilable
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_current_request
-from guillotina.utils import record_request_action
 
 import asyncpg
 
@@ -78,13 +77,11 @@ class TransactionManager(object):
         if user is not None:
             txn.user = user
 
-        record_request_action(request, 'beginTransaction')
         await txn.tpc_begin(db_conn)
 
         return txn
 
     async def commit(self, request=None, txn=None):
-        record_request_action(request, 'commitTransaction')
         return await shield(self._commit(request=request, txn=txn))
 
     async def _commit(self, request=None, txn=None):
@@ -122,7 +119,6 @@ class TransactionManager(object):
             self._last_db_conn = None
 
     async def abort(self, request=None, txn=None):
-        record_request_action(request, 'abortTransaction')
         return await shield(self._abort(request=request, txn=txn))
 
     async def _abort(self, request=None, txn=None):

@@ -44,7 +44,6 @@ from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
 from guillotina.utils import import_class
-from guillotina.utils import record_request_action
 from zope.interface import alsoProvides
 
 import aiohttp
@@ -190,7 +189,6 @@ class MatchInfo(AbstractMatchInfo):
     async def handler(self, request):
         """Main handler function for aiohttp."""
         request._view_error = False
-        record_request_action(request, 'render')
         if app_settings['check_writable_request'](request):
             try:
                 # We try to avoid collisions on the same instance of
@@ -228,8 +226,6 @@ class MatchInfo(AbstractMatchInfo):
                 view_result = generate_error_response(e, request, 'ViewError')
             finally:
                 await abort(request)
-
-        record_request_action(request, 'process')
 
         # Make sure its a Response object to send to renderer
         if not isinstance(view_result, Response):
