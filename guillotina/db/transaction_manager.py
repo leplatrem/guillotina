@@ -82,7 +82,7 @@ class TransactionManager(object):
         return txn
 
     async def commit(self, request=None, txn=None):
-        return await shield(self._commit(request=request, txn=txn))
+        return await self._commit(request=request, txn=txn)
 
     async def _commit(self, request=None, txn=None):
         """ Commit the last transaction

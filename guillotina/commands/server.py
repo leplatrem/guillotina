@@ -64,6 +64,9 @@ class ServerCommand(Command):
         port = arguments.port or settings.get('address', settings.get('port'))
         host = arguments.host or settings.get('host', '0.0.0.0')
         if arguments.line_profiler:
+            if not HAS_LINE_PROFILER:
+                return print('You must first install line_profiler for the --line-profiler option to work.'
+                             'Use `pip install line_profiler` to install line_profiler.')
             self.line_profiler = line_profiler.LineProfiler()
             for func in profile.get_profilable_functions():
                 if fnmatch(get_dotted_name(func), arguments.line_profiler_matcher or '*'):
@@ -102,9 +105,6 @@ class ServerCommand(Command):
                 # dump to screen
                 self.profiler.print_stats(-1)
         if self.line_profiler is not None:
-            if not HAS_LINE_PROFILER:
-                return print('You must first install line_profiler for the --line-profiler option to work.'
-                             'Use `pip install line_profiler` to install line_profiler.')
             self.line_profiler.disable_by_count()
             if arguments.line_profiler_output:
                 self.line_profiler.dump_stats(arguments.line_profiler_output)
